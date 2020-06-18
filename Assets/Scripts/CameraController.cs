@@ -147,7 +147,7 @@ public class CameraController : MonoBehaviour
 
     void FollowTarget()
     {
-        float offsetChange = 0;
+        
 
         // Get forward vector minus the y component
         Vector3 vectorA = new Vector3(transform.forward.x, 0.0f, transform.forward.z);
@@ -169,15 +169,23 @@ public class CameraController : MonoBehaviour
 
 
 
-        Debug.DrawRay(player.transform.position, mCamera.position - player.transform.position);
+        Debug.DrawRay(player.transform.position, mCamera.position - player.transform.position, Color.red);
         RaycastHit hit;
         if (Physics.Raycast(player.transform.position, mCamera.position - player.transform.position, out hit, offset, whatIsGround))
         {
-            offsetChange = hit.distance;
+            float offsetChange = hit.distance;
+
+            // Position the camera behind target at a distance of offset but not clipping environment
+            transform.position = player.transform.position - (transform.forward * (offsetChange - 0.5f));
+            transform.LookAt(player.transform.position);
+        }
+        else
+        {
+            // Position the camera behind target at a distance of offset
+            transform.position = player.transform.position - (transform.forward * offset);
+            transform.LookAt(player.transform.position);
         }
 
-        // Position the camera behind target at a distance of offset
-        transform.position = player.transform.position - (transform.forward * (offset - offsetChange));
-        transform.LookAt(player.transform.position);
+        
     }
 }

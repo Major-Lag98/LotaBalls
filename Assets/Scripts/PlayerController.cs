@@ -61,10 +61,10 @@ public class PlayerController : MonoBehaviour
                 break;
         }
     }
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawWireSphere(transform.position - (Vector3.up * 0.5f), groundCheckRadius);
-    }
+    //private void OnDrawGizmos()
+    //{
+    //    Gizmos.DrawWireSphere(transform.position - (Vector3.up * 0.5f), groundCheckRadius);
+    //}
 
     /// <summary>
     /// Applies force to player object
@@ -104,7 +104,7 @@ public class PlayerController : MonoBehaviour
         //Check if we need to offset camera because of ramp
         Ray ray = new Ray(transform.position, Vector3.down);
         RaycastHit hit;
-        Debug.DrawRay(transform.position, Vector3.down, Color.red);
+        //Debug.DrawRay(transform.position, Vector3.down, Color.red);
 
         if (Physics.Raycast(ray, out hit) && hit.transform.CompareTag("Ramp"))
         {
