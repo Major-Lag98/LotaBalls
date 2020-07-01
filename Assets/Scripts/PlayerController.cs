@@ -1,23 +1,15 @@
-﻿/**
- * This component handles player movment
- */
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public enum State
+    public enum State //add states as needed
     {
-        WAIT,
-        NORMAL,
-        DEAD,
-        VICTORY,
-        STATES
+        NORMAL
     }
 
-    //[HideInInspector]
+    [HideInInspector]
     public State currentState;
 
     [HideInInspector]
@@ -35,12 +27,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float groundCheckRadius = 0.25f;
 
-    public float maxSpeed = 10;
+    [SerializeField]
+    public float maxSpeed = 15;
 
     [SerializeField]
     private float moveForce = 5;
-    [SerializeField]
-    private float victoryForce = 20;
+    
 
     
 
@@ -49,18 +41,9 @@ public class PlayerController : MonoBehaviour
     {
         rigidBody = GetComponent<Rigidbody>();  // Get rigidbody component
 
-        currentState = State.WAIT;            // Set current state to WAIT
+        //currentState = State.WAIT;            // Set current state to WAIT
     }
 
-    void FixedUpdate()
-    {
-        switch (currentState)
-        {
-            case State.VICTORY:
-                ApplyVictoryForce();
-                break;
-        }
-    }
     //private void OnDrawGizmos()
     //{
     //    Gizmos.DrawWireSphere(transform.position - (Vector3.up * 0.5f), groundCheckRadius);
@@ -84,7 +67,7 @@ public class PlayerController : MonoBehaviour
             {
                 rigidBody.velocity = Vector3.Lerp(rigidBody.velocity, Vector3.zero, moveForce * 0.1f * Time.deltaTime); // Slow down
             }
-            else
+            else if (rigidBody.velocity.magnitude < maxSpeed) //restrict speed
             {
                 // Get a direction perpendicular to the camera's right vector and the floor's normal (The forward direction)
                 Vector3 forward = Vector3.Cross(right, floorNormal);
@@ -119,27 +102,14 @@ public class PlayerController : MonoBehaviour
     /// <returns>
     /// True if CheckSphere overlaps with collider within the whatIsGround layer mask, else return False
     /// </returns>
-    public bool OnGround()
+    /// 
+    public bool OnGround() 
     {
         
         return Physics.CheckSphere(transform.position - (Vector3.up * 0.5f), groundCheckRadius, whatIsGround);
     }
 
-    /// <summary>
-    /// Applies an upward force to the player to lift them up to the next stage
-    /// </summary>
-    private void ApplyVictoryForce()
-    {
-        Vector3 flatVel = new Vector3(rigidBody.velocity.x, 0.0f, rigidBody.velocity.z);
-
-        // Move in the opposite direction of velocity minus the y component
-        if (flatVel.magnitude > 0.1f)
-            rigidBody.AddForce(-flatVel);
-
-
-        // Increment force in the up direction
-        rigidBody.AddForce(victoryForce++ * Vector3.up);
-    }
+    
 
     /// <summary>
     /// Sets floor normal by casting ray below player
@@ -153,20 +123,4 @@ public class PlayerController : MonoBehaviour
             floorNormal = hit.normal;
         }
     }
-
-    //public void OnTriggerEnter(Collider other)
-    //{
-    //    if (currentState == State.NORMAL)
-    //    {
-    //        // Player collides with collectible
-    //        if (other.tag == "Collectible")
-    //        {
-    //            Collectible collectible = other.GetComponent<Collectible>();    // Get collectible
-
-    //            // If collectible has not been picked up
-    //            if (collectible != null && !collectible.pickedUp)
-    //                collectible.PickedUp(transform);
-    //        }
-    //    }
-    //}
 }

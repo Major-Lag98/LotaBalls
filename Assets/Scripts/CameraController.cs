@@ -23,23 +23,15 @@ public class CameraController : MonoBehaviour
 
     [SerializeField]
     private LayerMask whatIsGround;
+    [SerializeField]
+    private float maxVerticalAngle = 15;
+    [SerializeField]
+    private float maxHorizontalAngle = 10;
+    [SerializeField]
+    private float tiltSpeed = 75;
 
     [SerializeField]
-    private float spiralTimer;
-    [SerializeField]
-    private float spiralSpeed;
-    [SerializeField]
-    private float spiralSpeedMultiplier;
-
-    [SerializeField]
-    private float maxVerticalAngle;
-    [SerializeField]
-    private float maxHorizontalAngle;
-    [SerializeField]
-    private float tiltSpeed;
-
-    [SerializeField]
-    private float offset;
+    private float offset = 4;
 
     private bool useFloorNormal;
 
@@ -47,7 +39,6 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         mCamera = transform.GetChild(0);                // Get Camera from child
-        //player = FindObjectOfType<PlayerController>();  // Find player
 
         initialXRotation = transform.eulerAngles.x;     // Store initial x rotation
     }
@@ -75,52 +66,14 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        switch (player.currentState) {
-            case PlayerController.State.WAIT:
-                SpiralProcedure();
-                break;
+        switch (player.currentState)
+        {
             case PlayerController.State.NORMAL:
                 // Follow the player
                 FollowTarget();
                 break;
-            case PlayerController.State.DEAD:
-                // Only look as the player falls
-                transform.LookAt(player.transform.position);
-                break;
-        }
-    }
-
-    void SpiralProcedure()
-    {
-        // Decrement timer
-        if (spiralTimer > 0.0f)
-            // Speed up timer if the player is holding down the "Jump" button
-            if (Input.GetButton("Jump"))
-                spiralTimer -= spiralSpeed * Time.deltaTime * spiralSpeedMultiplier;
-            else
-                spiralTimer -= spiralSpeed * Time.deltaTime;
-        // Timer reaches 0
-        else
-        {
-            // Start the stage (Follow the player)
-            spiralTimer = 0.0f;
-            StartStage();
         }
 
-        // This moves the camera in a spiral patttern that gets smaller the more the spiral decrements
-        float x = Mathf.Sin(spiralTimer) * Mathf.Pow(1.0f + spiralTimer, 2.0f);
-        float z = -Mathf.Cos(spiralTimer) * Mathf.Pow(1.0f + spiralTimer, 2.0f);
-
-        transform.position = new Vector3(x, spiralTimer, z) + player.transform.position;
-
-        transform.LookAt(player.transform.position);                                                                // Face the player
-        transform.eulerAngles = new Vector3(initialXRotation, transform.eulerAngles.y, transform.eulerAngles.z);    // Adjust X angle
-        transform.position = transform.position - (transform.forward * offset) + Vector3.forward;                   // Move back by a distance of offset + move it forward a distance of forward (1.0f)
-    }
-
-    void StartStage()
-    {
-        player.currentState = PlayerController.State.NORMAL;
     }
 
     void CameraTilt()
@@ -168,10 +121,9 @@ public class CameraController : MonoBehaviour
         transform.Rotate(Vector3.up, rotateAngle * Mathf.Clamp(speedFactor, 1.0f, 2.0f) * Time.deltaTime);
 
 
-
-        Debug.DrawRay(player.transform.position, mCamera.position - player.transform.position, Color.red);
-        RaycastHit hit;
-        if (Physics.Raycast(player.transform.position, mCamera.position - player.transform.position, out hit, offset, whatIsGround))
+        // Attempt to not clip camera into environment
+        //Debug.DrawRay(player.transform.position, mCamera.position - player.transform.position, Color.red);
+        if (Physics.Raycast(player.transform.position, mCamera.position - player.transform.position, out RaycastHit hit, offset, whatIsGround))
         {
             float offsetChange = hit.distance;
 
